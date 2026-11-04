@@ -13,15 +13,15 @@ O objetivo foi estruturar um fluxo modular e automatizado para extração, limpe
 ## Fonte dos Dados
 
 Os arquivos de dados brutos (`.csv`) devem estar salvos no projeto:
-- `arabica_data_cleaned.csv`
-- `robusta_data_cleaned.csv`
+- `arabica_data.csv`
+- `robusta_data.csv`
 
 ## Estrutura do Pipeline
 
 O tratamento dos dados e a orquestração do processo foram divididos em módulos para separar as responsabilidades de cada etapa:
 
 1. **Extração (`src/extract.py`):**
-   - Leitura dos arquivos CSV (`arabica_data_cleaned.csv` e `robusta_data_cleaned.csv`).
+   - Leitura dos arquivos CSV (`arabica_data.csv` e `robusta_data.csv`).
 
 2. **Transformação (`src/transform.py`):**
    - Padronização de nomes de colunas e textos.
@@ -51,7 +51,7 @@ Após a carga no banco de dados, utilizamos as tabelas `arabica` e `robusta` par
    ```
 
 2. Execute o pipeline principal na raiz do projeto:
-  ```bash
+   ```bash
    python main.py
    ```
 
