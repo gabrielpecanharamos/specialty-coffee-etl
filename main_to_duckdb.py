@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
+import duckdb
 
+# Extract
+df_arabica = pd.read_csv('arabica_data.csv')
+df_robusta = pd.read_csv('robusta_data.csv')
+
+# Transform
 def padronizar_colunas(df):
     df.columns = (
         df.columns
@@ -44,6 +50,7 @@ def limpar_altitudes(df, alt_min=500, alt_max=5000):
     df.loc[condicao_invalida, colunas_altitude] = np.nan
 
     df['altitude_mean_meters'] = df[['altitude_low_meters', 'altitude_high_meters']].mean(axis=1)
+
     return df
 
 def remover_outliers(df, nota_minima=50):
@@ -70,14 +77,29 @@ def aplicar_limpeza(df):
     df.insert(0, 'ranking_global', df.index + 1)
     return df
 
-def transform_data(df_arabica, df_robusta):
-    df_arabica = aplicar_limpeza(df_arabica)
-    df_robusta = aplicar_limpeza(df_robusta)
+df_arabica = aplicar_limpeza(df_arabica)
+df_robusta = aplicar_limpeza(df_robusta)
 
-    filtro = (
+filtro = (
     df_arabica['country_of_origin'].isna() & 
     df_arabica['certification_address'].str.contains('E493C36C2D076Bf273064F7Ac23Ad562Af257A25', case=False, na=False)
-    )
+)
 
-    df_arabica.loc[filtro, 'country_of_origin'] = 'Colombia'
-    return df_arabica, df_robusta
+df_arabica.loc[filtro, 'country_of_origin'] = 'Colombia'
+
+# Load
+coffee = duckdb.connect(':memory:')
+
+coffee.sql("CREATE OR REPLACE TABLE arabica AS SELECT * FROM df_arabica")
+coffee.sql("CREATE OR REPLACE TABLE robusta AS SELECT * FROM df_robusta")
+
+# TOP 10 Arábica - Consulta SQL via DuckDB
+coffee.sql("""
+    SELECT ranking_global, country_of_origin, variety,
+    processing_method, total_cup_points, altitude_mean_meters
+    FROM arabica
+    ORDER BY ranking_global
+    LIMIT 10;
+""").show()
+
+coffee.close()

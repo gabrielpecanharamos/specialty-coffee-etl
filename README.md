@@ -1,61 +1,30 @@
 # speciality-coffee-etl 
 
-Este repositório contém o código e a documentação do pipeline ETL desenvolvido para o processamento de dados sobre variedades de café (**Arábica** e **Robusta**), além de consultas analíticas em SQL.
+Este é um projeto ETL completo e modular, projetado para execução simples e direta, focado no processamento de dados de qualidade de cafés especiais das espécies Árabica e Robusta.
 
-O objetivo foi estruturar um fluxo modular e automatizado para extração, limpeza e carga dos dados em banco relacional.
+A proposta é simples e didática: transformar dados brutos em informação estruturada para análise, permitindo executar o projeto localmente em **DuckDB** com zero configuração ou num ambiente corporativo com **Microsoft SQL Server**.
 
-## Tecnologias Utilizadas
+## Conhecendo os Destinos de Carga
 
-- **Linguagem:** Python
-- **Manipulação de Dados:** Pandas
-- **Armazenamento e Consultas:** DuckDB, SQL Server (via SQLAlchemy)
+Para quem está a descarregar o repositório, o código já está 100% pronto. Apenas precisa de escolher em qual motor quer guardar e consultar os seus dados:
 
-## Fonte dos Dados
+**Atenção:** Os ficheiros arabica_data.csv e robusta_data.csv devem estar guardados na mesma pasta dos scripts Python para que a execução funcione corretamente.
 
-Os arquivos de dados brutos (`.csv`) devem estar salvos no projeto:
-- `arabica_data.csv`
-- `robusta_data.csv`
+### DuckDB (Para Análises Locais e Rápidas)
+É a opção ideal para quem quer apenas fazer o download do projeto e rodar tudo imediatamente sem precisar de instalar ou configurar servidores de bases de dados. Ao executar o script, o DuckDB cria automaticamente um ficheiro local chamado `coffee.duckdb` na raiz do projeto, contendo as tabelas `arabica` e `robusta` prontas para consulta.
 
-## Estrutura do Pipeline
+### Microsoft SQL Server (Para Ambientes Corporativos)
+É a opção pensada para cenários empresariais, simulação de ambiente de produção e integração com ferramentas corporativas de BI. O script conecta-se ao seu serviço do SQL Server, cria automaticamente a base de dados `dados_cafe` (caso ainda não exista) e estrutura as tabelas com tipos de dados otimizados.
 
-O tratamento dos dados e a orquestração do processo foram divididos em módulos para separar as responsabilidades de cada etapa:
+## Estrutura do Projeto
 
-1. **Extração (`src/extract.py`):**
-   - Leitura dos arquivos CSV (`arabica_data.csv` e `robusta_data.csv`).
+O repositório adota uma estrutura plana para garantir que pode abrir o VS Code e rodar os scripts imediatamente sem se preocupar com imports complexos de pastas:
 
-2. **Transformação (`src/transform.py`):**
-   - Padronização de nomes de colunas e textos.
-   - Tratamento de altitude e remoção de inconsistências.
-   - Limpeza e conversão de tipos de dados.
-
-3. **Carga e Armazenamento (`src/load.py`):**
-   - Persistência em banco de dados (`DuckDB` ou `SQL Server`).
-   - Criação e substituição das tabelas finais (`arabica` e `robusta`).
-
-4. **Orquestração (`main.py`):**
-   - Localizado na raiz do projeto, executa a sequência completa (Extração ➔ Transformação ➔ Carga).
-
-## Consultas e Análises em SQL
-
-Após a carga no banco de dados, utilizamos as tabelas `arabica` e `robusta` para consultas analíticas e prática de SQL:
-
-- **Comparação de Qualidade:** Média da pontuação total por país de origem.
-- **Análise por Variedade:** Consultas comparativas entre café Arábica e Robusta.
-- **Filtros de Altitude:** Identificação de lotes produzidos em regiões de alta altitude.
-
-## Como Executar
-
-1. Instale as dependências necessárias:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. Execute o pipeline principal na raiz do projeto:
-   ```bash
-   python main.py
-   ```
-
-3. Caso queira direcionar a carga para o SQL Server:
-   ```bash
-   python main.py --target sqlserver --conn-string "SUA_STRING_DE_CONEXAO"
-   ```
+```text
+specialty-coffee-etl/
+├── arabica_data.csv            # Dados brutos de cafés Árabica
+├── robusta_data.csv            # Dados brutos de cafés Robusta
+├── main_to_duckdb.py           # Script ETL para carregar no DuckDB
+├── main_to_sqlserver.py        # Script ETL para carregar no SQL Server
+├── requirements.txt            # Bibliotecas necessárias
+├── README.md                   # Documentação do projeto
