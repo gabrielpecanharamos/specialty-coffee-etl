@@ -13,8 +13,8 @@ Para quem está a descarregar o repositório, o código já está 100% pronto. A
 ### DuckDB (Para Análises Locais e Rápidas)
 É a opção ideal para quem quer apenas fazer o download do projeto e rodar tudo imediatamente sem precisar de instalar ou configurar servidores de bases de dados. Ao executar o script, o DuckDB cria automaticamente um ficheiro local chamado `coffee.duckdb` na raiz do projeto, contendo as tabelas `arabica` e `robusta` prontas para consulta.
 
-### Microsoft SQL Server (Para Ambientes Corporativos)
-É a opção pensada para cenários empresariais, simulação de ambiente de produção e integração com ferramentas corporativas de BI. O script conecta-se ao seu serviço do SQL Server, cria automaticamente a base de dados `dados_cafe` (caso ainda não exista) e estrutura as tabelas com tipos de dados otimizados.
+### Microsoft SQL Server (Para Consultas e Análises Avançadas)
+É a opção pensada para cenários empresariais, simulação de ambiente de produção. O script conecta-se ao seu serviço do SQL Server, cria automaticamente a base de dados `dados_cafe` (caso ainda não exista) e estrutura as tabelas com tipos de dados otimizados.
 
 ## Estrutura do Projeto
 

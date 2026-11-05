@@ -93,7 +93,7 @@ coffee = duckdb.connect(':memory:')
 coffee.sql("CREATE OR REPLACE TABLE arabica AS SELECT * FROM df_arabica")
 coffee.sql("CREATE OR REPLACE TABLE robusta AS SELECT * FROM df_robusta")
 
-# TOP 10 Arábica - Consulta SQL via DuckDB
+# TOP 10 Arábica - Exemplo de consulta SQL via DuckDB
 coffee.sql("""
     SELECT ranking_global, country_of_origin, variety,
     processing_method, total_cup_points, altitude_mean_meters
