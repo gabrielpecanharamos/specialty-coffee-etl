@@ -11,7 +11,7 @@ Para quem está a descarregar o repositório, o código já está 100% pronto. A
 **Atenção:** Os ficheiros arabica_data.csv e robusta_data.csv devem estar guardados na mesma pasta dos scripts Python para que a execução funcione corretamente.
 
 ### DuckDB (Para Análises Locais e Rápidas)
-É a opção ideal para quem quer apenas fazer o download do projeto e rodar tudo imediatamente sem precisar de instalar ou configurar servidores de bases de dados. Ao executar o script, o DuckDB executa diretamente na `memória RAM`, carregando as tabelas `arabica` e `robusta` prontas para consulta.
+É a opção ideal para quem quer apenas fazer o download do projeto e rodar tudo imediatamente sem precisar de instalar ou configurar servidores de bases de dados. Ao executar o script, o DuckDB executa diretamente na `memória RAM`, carregando as tabelas `arábica` e `robusta` prontas para consulta.
 
 ### Microsoft SQL Server (Para Consultas e Análises Avançadas)
 É a opção pensada para cenários empresariais, simulação de ambiente de produção. O script conecta-se ao seu serviço do SQL Server, cria automaticamente a base de dados `dados_cafe` (caso ainda não exista) e estrutura as tabelas com tipos de dados otimizados.
@@ -21,8 +21,8 @@ Para quem está a descarregar o repositório, o código já está 100% pronto. A
 Todas as análises de banco de dados e os recursos visuais do projeto estão organizados na pasta [`/sql`](./sql):
 
 - **Consultas SQL (`sql/query.sql`):** Scripts contendo as queries de agregação, filtros de qualidade, comparações de altitude e rankings dos lotes campeões por país (*Arabica* vs *Robusta*).
-- **Dashboard Interativo (`sql/specialty-coffee-dashboard.html`):** Painel de visualização estático/HTML gerado com o apoio do **Gemini**, estruturado para apresentar os principais KPIs de notas e distribuição geográfica.
-- **Engenharia de Prompt (`sql/PROMPT.md`):** O prompt exato utilizado para conceber o dashboard e as suas iterações estão documentados no arquivo [`PROMPT.md`](./sql/PROMPT.md).
+- **Dashboard Interativo (`sql/specialty-coffee-dashboard.html`):** Painel de visualização/HTML gerado com o apoio do **Gemini**, estruturado para apresentar as consultas SQL.
+- **Prompt (`sql/PROMPT.md`):** O prompt exato utilizado para conceber o dashboard e as suas iterações estão documentados no arquivo [`PROMPT.md`](./sql/PROMPT.md).
 
 ## Estrutura do Projeto
 
