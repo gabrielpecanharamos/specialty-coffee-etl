@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Análise de Dados - Cafés Especiais</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        coffeeBg: '#F8F5EF',
+                        coffeeCard: '#FFFDF9',
+                        coffeeTitle: '#49352A',
+                        coffeeText: '#75685D',
+                        coffeeCaramel: '#B98755',
+                        coffeeBeige: '#D8C3A5',
+                        coffeeOlive: '#788064',
+                        coffeeLightBeige: '#F0E8DD'
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8F5EF;
+            color: #75685D;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .tab-btn.active {
+            background-color: #49352A;
+            color: #FFFDF9;
+            box-shadow: 0 4px 12px rgba(73, 53, 42, 0.15);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F8F5EF;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #D8C3A5;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #B98755;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Header Navigation & Title -->
+    <header class="bg-coffeeCard border-b border-coffeeBeige/30 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between py-4 gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-coffeeCaramel/15 flex items-center justify-center text-coffeeCaramel border border-coffeeCaramel/20">
+                        <i class="fa-solid fa-mug-hot text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold text-coffeeTitle tracking-tight">Análise de Cafés Especiais</h1>
+                        <p class="text-xs sm:text-sm text-coffeeText flex items-center gap-2">
+                            <span>Painel de Inteligência e Qualidade Sensorial</span>
+                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-coffeeOlive"></span>
+                            <span class="text-coffeeOlive font-medium text-xs">Dados SQL Verificados</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs (3 main tabs) -->
+                <nav class="flex flex-wrap gap-1.5 bg-coffeeBg p-1.5 rounded-xl border border-coffeeBeige/40">
+                    <button onclick="switchTab('arabica')" id="tab-arabica" class="tab-btn active px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-2">
+                        <i class="fa-solid fa-seedling"></i>
+                        <span>Cafés Arábica</span>
+                    </button>
+                    <button onclick="switchTab('robusta')" id="tab-robusta" class="tab-btn px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-coffeeText hover:text-coffeeTitle transition-all duration-200 flex items-center gap-2">
+                        <i class="fa-solid fa-leaf"></i>
+                        <span>Cafés Robusta</span>
+                    </button>
+                    <button onclick="switchTab('comparative')" id="tab-comparative" class="tab-btn px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-coffeeText hover:text-coffeeTitle transition-all duration-200 flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        <span>Análise Comparativa</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Controls & Filters Bar -->
+    <div class="bg-coffeeCard/60 border-b border-coffeeBeige/20 py-3">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
+                <div class="flex items-center gap-2 text-coffeeTitle font-semibold">
+                    <i class="fa-solid fa-filter text-coffeeCaramel"></i>
+                    <span>Filtros Interativos:</span>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2.5 flex-1 max-w-4xl">
+                    <!-- Country Filter -->
+                    <select id="filter-country" onchange="applyFilters()" class="bg-coffeeCard border border-coffeeBeige/60 rounded-lg px-3 py-1.5 text-coffeeText focus:outline-none focus:border-coffeeCaramel font-medium">
+                        <option value="all">Todos os Países</option>
+                        <option value="Ethiopia">Etiópia</option>
+                        <option value="Guatemala">Guatemala</option>
+                        <option value="Brazil">Brasil</option>
+                        <option value="Colombia">Colômbia</option>
+                        <option value="Uganda">Uganda</option>
+                        <option value="Kenya">Quênia</option>
+                        <option value="India">Índia</option>
+                    </select>
+
+                    <!-- Processing Filter -->
+                    <select id="filter-process" onchange="applyFilters()" class="bg-coffeeCard border border-coffeeBeige/60 rounded-lg px-3 py-1.5 text-coffeeText focus:outline-none focus:border-coffeeCaramel font-medium">
+                        <option value="all">Todos os Processamentos</option>
+                        <option value="Washed / Wet">Via Úmida (Washed / Wet)</option>
+                        <option value="Natural / Dry">Via Seca (Natural / Dry)</option>
+                        <option value="Pulped Natural / Honey">Despolpado (Honey)</option>
+                        <option value="Semi-Washed / Semi-Pulped">Semiumido (Semi-Washed)</option>
+                    </select>
+
+                    <!-- Score Range Filter -->
+                    <select id="filter-score" onchange="applyFilters()" class="bg-coffeeCard border border-coffeeBeige/60 rounded-lg px-3 py-1.5 text-coffeeText focus:outline-none focus:border-coffeeCaramel font-medium">
+                        <option value="all">Todas as Faixas de Nota</option>
+                        <option value="90+">90+ Pontos (Excepcional)</option>
+                        <option value="85-89.9">85 – 89.9 Pontos (Excelente)</option>
+                        <option value="80-84.9">80 – 84.9 Pontos (Muito Bom)</option>
+                    </select>
+
+                    <button onclick="resetFilters()" class="text-xs text-coffeeCaramel hover:text-coffeeTitle font-semibold px-2 py-1 underline">
+                        Limpar Filtros
+                    </button>
+                </div>
+
+                <div id="filter-status" class="text-xs text-coffeeText/70 bg-coffeeLightBeige/50 px-2.5 py-1 rounded-md">
+                    Exibindo <span id="active-records" class="font-bold text-coffeeTitle">1.338</span> lotes auditados
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Containers -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: ANÁLISE ARÁBICA -->
+        <div id="content-arabica" class="tab-content space-y-6">
+            <!-- Arábica KPIs -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-coffeeCard p-5 rounded-2xl border border-coffeeBeige/40 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-coffeeText uppercase tracking-wider">Pontuação Máxima</p>
+                        <h3 class="text-2xl sm:text-3xl font-bold text-coffeeCaramel mt-1">90,58 pts</h3>
+                        <span class="inline-flex items-center text-[11px] text-coffeeCaramel font-medium mt-1">
+                            <i class="fa-solid fa-trophy mr-1"></i> Etiópia (Washed)
+                        </span>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-coffeeCaramel/15 flex items-center justify-center text-coffeeCaramel">
+                        <i class="fa-solid fa-award text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="bg-coffeeCard p-5 rounded-2xl border border-coffeeBeige/40 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-coffeeText uppercase tracking-wider">Pontuação Média</p>
+                        <h3 class="text-2xl sm:text-3xl font-bold text-coffeeTitle mt-1">82,18 pts</h3>
+                        <span class="inline-flex items-center text-[11px] text-coffeeText font-medium mt-1">
+                            <i class="fa-solid fa-boxes-stacked mr-1"></i> 1.310 Lotes Avaliados
+                        </span>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-coffeeBeige/20 flex items-center justify-center text-coffeeTitle">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="bg-coffeeCard p-5 rounded-2xl border border-coffeeBeige/40 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-coffeeText uppercase tracking-wider">Destaque Brasileiro</p>
+                        <h3 class="text-2xl sm:text-3xl font-bold text-coffeeOlive mt-1">88,83 pts</h3>
+                        <span class="inline-flex items-center text-[11px] text-coffeeOlive font-medium mt-1">
+                            <i class="fa-solid fa-flag mr-1"></i> 6º Lugar Global (Natural)
+                        </span>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-coffeeOlive/15 flex items-center justify-center text-coffeeOlive">
+                        <i class="fa-solid fa-seedling text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="bg-coffeeCard p-5 rounded-2xl border border-coffeeBeige/40 shadow-xs flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-coffeeText uppercase tracking-wider">Maior Produção</p>
+                        <h3 class="text-2xl sm:text-3xl font-bold text-coffeeTitle mt-1">41.353</h3>
+                        <span class="inline-flex items-center text-[11px] text-coffeeText font-medium mt-1">
+                            <i class="fa-solid fa-wheat-awn mr-1"></i> Colômbia (Sacas 60kg)
+                        </span>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-coffeeTitle/10 flex items-center justify-center text-coffeeTitle">
+                        <i class="fa-solid fa-layer-group text-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SENSORY RADARS ROW (Top 10 Mundial vs Top 10 Brasil) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Radar Top 10 Mundial -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-coffeeTitle">Perfil Sensorial: Top 10 Mundial (Arábica)</h3>
+                            <p class="text-xs text-coffeeText">Selecione os cafés que deseja comparar no gráfico radar</p>
+                        </div>
+                        <span class="text-xs font-bold text-coffeeCaramel bg-coffeeCaramel/10 px-2.5 py-1 rounded-full w-fit">Comparativo Dinâmico</span>
+                    </div>
+
+                    <!-- Dynamic Selector for World Top 10 -->
+                    <div class="mb-4 bg-coffeeBg p-3 rounded-xl border border-coffeeBeige/40">
+                        <label class="block text-xs font-bold text-coffeeTitle mb-1">Cafés Selecionados para Comparação:</label>
+                        <div id="selector-sensory-world" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto custom-scrollbar p-1">
+                            <!-- Checkboxes injected dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="relative h-72 sm:h-80 w-full flex items-center justify-center">
+                        <canvas id="chartSensoryWorld"></canvas>
+                    </div>
+                </div>
+
+                <!-- Radar Top 10 Brasil -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-coffeeTitle">Perfil Sensorial: Top 10 Brasil (Arábica)</h3>
+                            <p class="text-xs text-coffeeText">Escolha e confronte os lotes brasileiros selecionados</p>
+                        </div>
+                        <span class="text-xs font-bold text-coffeeOlive bg-coffeeOlive/15 px-2.5 py-1 rounded-full w-fit">Seleção Interativa</span>
+                    </div>
+
+                    <!-- Dynamic Selector for Brazil Top 10 -->
+                    <div class="mb-4 bg-coffeeBg p-3 rounded-xl border border-coffeeBeige/40">
+                        <label class="block text-xs font-bold text-coffeeTitle mb-1">Cafés Selecionados para Comparação:</label>
+                        <div id="selector-sensory-brazil" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto custom-scrollbar p-1">
+                            <!-- Checkboxes injected dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="relative h-72 sm:h-80 w-full flex items-center justify-center">
+                        <canvas id="chartSensoryBrazil"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tables Row: Top 10 World & Top 10 Brazil -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Top 10 World Table -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold text-coffeeTitle">Top 10 Melhores Cafés Arábica (Mundo)</h3>
+                                <p class="text-xs text-coffeeText">Ranking mundial absoluto extraído das consultas SQL</p>
+                            </div>
+                            <span class="text-xs font-bold text-coffeeCaramel bg-coffeeCaramel/10 px-2.5 py-1 rounded-full">Global</span>
+                        </div>
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-coffeeBg text-coffeeTitle uppercase text-[10px] font-bold border-b border-coffeeBeige/40">
+                                    <tr>
+                                        <th class="py-2.5 px-2">#</th>
+                                        <th class="py-2.5 px-2">País</th>
+                                        <th class="py-2.5 px-2">Método</th>
+                                        <th class="py-2.5 px-2">Altitude</th>
+                                        <th class="py-2.5 px-2 text-right">Pontuação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-top10-world" class="divide-y divide-coffeeBeige/20">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-coffeeText/70 mt-3 italic">* Etiópia destaca-se com 6 das 10 maiores pontuações globais.</p>
+                </div>
+
+                <!-- Top 10 Brazil Table -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold text-coffeeTitle">Top 10 Cafés Brasileiros (Arábica)</h3>
+                                <p class="text-xs text-coffeeText">Ranking dos melhores lotes nacionais e origens regionais</p>
+                            </div>
+                            <span class="text-xs font-bold text-coffeeOlive bg-coffeeOlive/15 px-2.5 py-1 rounded-full">Brasil</span>
+                        </div>
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-coffeeBg text-coffeeTitle uppercase text-[10px] font-bold border-b border-coffeeBeige/40">
+                                    <tr>
+                                        <th class="py-2.5 px-2">Rank</th>
+                                        <th class="py-2.5 px-2">Região</th>
+                                        <th class="py-2.5 px-2">Produtor</th>
+                                        <th class="py-2.5 px-2">Variedade</th>
+                                        <th class="py-2.5 px-2 text-right">Pontuação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-top10-brazil" class="divide-y divide-coffeeBeige/20">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-coffeeText/70 mt-3 italic">* Forte concentração no Sul de Minas e Vale da Grama, com processo Natural.</p>
+                </div>
+            </div>
+
+            <!-- Altitude Scatter & Processing Impact -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Altitude Scatter Chart -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-coffeeTitle">Relação entre Altitude e Pontuação</h3>
+                        <p class="text-xs text-coffeeText">Distribuição da pontuação total em função da altitude média de cultivo (metros)</p>
+                    </div>
+                    <div class="relative h-72 w-full">
+                        <canvas id="chartAltitudeScatter"></canvas>
+                    </div>
+                </div>
+
+                <!-- Processing Impact Chart -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-coffeeTitle">Impacto dos Métodos de Processamento</h3>
+                        <p class="text-xs text-coffeeText">Pontuação máxima e pontuação média por tipo de beneficiamento</p>
+                    </div>
+                    <div class="relative h-72 w-full">
+                        <canvas id="chartProcessingImpact"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Production & Average Score by Country -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Average Score by Country (Filtered >= 20 lots) -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-coffeeTitle">Média de Pontuação por País</h3>
+                            <p class="text-xs text-coffeeText">Apenas origens com amostragem relevante (&ge; 20 lotes)</p>
+                        </div>
+                    </div>
+                    <div class="relative h-72 w-full">
+                        <canvas id="chartCountryAverage"></canvas>
+                    </div>
+                </div>
+
+                <!-- Total Bags Produced Top 10 -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-coffeeTitle">Volume de Produção (Dez Maiores Países)</h3>
+                            <p class="text-xs text-coffeeText">Total de sacas registradas na amostragem por país</p>
+                        </div>
+                    </div>
+                    <div class="relative h-72 w-full">
+                        <canvas id="chartTopProducers"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: ANÁLISE ROBUSTA -->
+        <div id="content-robusta" class="tab-content hidden space-y-6">
+            <!-- Robusta KPIs -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-coffeeCard p-5 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <p class="text-xs font-semibold text-coffeeText uppercase tracking-wider">Pontuação Máxima Robusta</p>
+                    <div class="flex items-baseline justify-between mt-1">
+                        <h3 class="text-2xl sm:text-3xl font-bold text-coffeeOlive">83,75 pts</h3>
+                        <span class="text-xs font-semibold text-coffeeOlive bg-coffeeOlive/15 px-2 py-0.5 rounded">Uganda</span>
+                    </div>
+                    <p class="text-xs text-coffeeText/80 mt-1">Lote Rank 1 de Robusta na base de dados</p>
+                </div>
+
+                <div class="bg-coffeeCard p-5 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <p class="text-xs font-semibold text-coffeeText uppercase tracking-wider">Média de Pontuação</p>
+                    <div class="flex items-baseline justify-between mt-1">
+                        <h3 class="text-2xl sm:text-3xl font-bold text-coffeeTitle">80,87 pts</h3>
+                        <span class="text-xs font-semibold text-coffeeText">28 Lotes Auditados</span>
+                    </div>
+                    <p class="text-xs text-coffeeText/80 mt-1">Avaliado conforme o protocolo específico CQI Robusta</p>
+                </div>
+
+                <div class="bg-coffeeCard p-5 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <p class="text-xs font-semibold text-coffeeText uppercase tracking-wider">Maior Volume de Sacas</p>
+                    <div class="flex items-baseline justify-between mt-1">
+                        <h3 class="text-xl sm:text-2xl font-bold text-coffeeTitle">Índia</h3>
+                        <span class="text-xs font-semibold text-coffeeCaramel bg-coffeeCaramel/10 px-2 py-0.5 rounded">2.991 Sacas</span>
+                    </div>
+                    <p class="text-xs text-coffeeText/80 mt-1">13 lotes avaliados (Seguido por Uganda com 1.609 sacas)</p>
+                </div>
+            </div>
+
+            <!-- Sensory Radar & Country Performance -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Sensory Radar Robusta -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-coffeeTitle">Perfil Sensorial Detalhado (Robusta)</h3>
+                            <p class="text-xs text-coffeeText">Selecione os lotes de Robusta para comparar o gráfico de teia</p>
+                        </div>
+                        <span class="text-xs font-bold text-coffeeOlive bg-coffeeOlive/15 px-2.5 py-1 rounded-full w-fit">Seleção Dinâmica</span>
+                    </div>
+
+                    <!-- Dynamic Selector for Robusta -->
+                    <div class="mb-4 bg-coffeeBg p-3 rounded-xl border border-coffeeBeige/40">
+                        <label class="block text-xs font-bold text-coffeeTitle mb-1">Lotes Selecionados para Comparação:</label>
+                        <div id="selector-sensory-robusta" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto custom-scrollbar p-1">
+                            <!-- Checkboxes injected dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="relative h-72 sm:h-80 w-full flex items-center justify-center">
+                        <canvas id="chartRobustaRadar"></canvas>
+                    </div>
+                </div>
+
+                <!-- Country Performance Robusta -->
+                <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                    <div class="mb-3">
+                        <h3 class="text-lg font-bold text-coffeeTitle">Desempenho por País (Robusta)</h3>
+                        <p class="text-xs text-coffeeText">Pontuação média e volume total de sacas por origem</p>
+                    </div>
+                    <div class="relative h-72 sm:h-80 w-full">
+                        <canvas id="chartRobustaCountries"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Robusta Highlights Table -->
+            <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                <h3 class="text-lg font-bold text-coffeeTitle mb-1">Notas Sensoriais dos Cafés Robusta</h3>
+                <p class="text-xs text-coffeeText mb-4">Detalhamento dos atributos de cupping por lote extraído do banco SQL</p>
+                
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-coffeeBg text-coffeeTitle uppercase text-[11px] font-bold border-b border-coffeeBeige/40">
+                            <tr>
+                                <th class="p-3">Rank Global</th>
+                                <th class="p-3">País</th>
+                                <th class="p-3">Processamento</th>
+                                <th class="p-3">Aroma</th>
+                                <th class="p-3">Sabor</th>
+                                <th class="p-3">Aftertaste</th>
+                                <th class="p-3">Sal / Acidez</th>
+                                <th class="p-3">Amargor / Doçura</th>
+                                <th class="p-3">Corpo</th>
+                                <th class="p-3 text-right">Pontuação</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-coffeeBeige/20 text-coffeeText">
+                            <tr class="hover:bg-coffeeBg/40">
+                                <td class="p-3 font-bold text-coffeeTitle">1</td>
+                                <td class="p-3 font-semibold text-coffeeTitle">Uganda</td>
+                                <td class="p-3 text-coffeeText/70">Não Informado</td>
+                                <td class="p-3">7,83</td>
+                                <td class="p-3">7,75</td>
+                                <td class="p-3">7,92</td>
+                                <td class="p-3">8,00</td>
+                                <td class="p-3">8,25</td>
+                                <td class="p-3">8,25</td>
+                                <td class="p-3 font-bold text-coffeeOlive text-right">83,75</td>
+                            </tr>
+                            <tr class="hover:bg-coffeeBg/40">
+                                <td class="p-3 font-bold text-coffeeTitle">2</td>
+                                <td class="p-3 font-semibold text-coffeeTitle">Índia</td>
+                                <td class="p-3">Washed / Wet</td>
+                                <td class="p-3">8,00</td>
+                                <td class="p-3">7,75</td>
+                                <td class="p-3">7,92</td>
+                                <td class="p-3">8,00</td>
+                                <td class="p-3">8,00</td>
+                                <td class="p-3">7,92</td>
+                                <td class="p-3 font-bold text-coffeeOlive text-right">83,50</td>
+                            </tr>
+                            <tr class="hover:bg-coffeeBg/40">
+                                <td class="p-3 font-bold text-coffeeTitle">3</td>
+                                <td class="p-3 font-semibold text-coffeeTitle">Índia</td>
+                                <td class="p-3 text-coffeeText/70">Não Informado</td>
+                                <td class="p-3">7,92</td>
+                                <td class="p-3">7,83</td>
+                                <td class="p-3">7,92</td>
+                                <td class="p-3">8,00</td>
+                                <td class="p-3">7,83</td>
+                                <td class="p-3">7,83</td>
+                                <td class="p-3 font-bold text-coffeeOlive text-right">83,25</td>
+                            </tr>
+                            <tr class="hover:bg-coffeeBg/40">
+                                <td class="p-3 font-bold text-coffeeTitle">4</td>
+                                <td class="p-3 font-semibold text-coffeeTitle">Uganda</td>
+                                <td class="p-3 text-coffeeText/70">Não Informado</td>
+                                <td class="p-3">8,00</td>
+                                <td class="p-3">7,92</td>
+                                <td class="p-3">7,92</td>
+                                <td class="p-3">7,75</td>
+                                <td class="p-3">7,75</td>
+                                <td class="p-3">7,83</td>
+                                <td class="p-3 font-bold text-coffeeOlive text-right">83,00</td>
+                            </tr>
+                            <tr class="hover:bg-coffeeBg/40">
+                                <td class="p-3 font-bold text-coffeeTitle">5</td>
+                                <td class="p-3 font-semibold text-coffeeTitle">Uganda</td>
+                                <td class="p-3 text-coffeeText/70">Não Informado</td>
+                                <td class="p-3">8,33</td>
+                                <td class="p-3">7,83</td>
+                                <td class="p-3">7,83</td>
+                                <td class="p-3">7,75</td>
+                                <td class="p-3">7,58</td>
+                                <td class="p-3">8,25</td>
+                                <td class="p-3 font-bold text-coffeeOlive text-right">83,00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: ANÁLISE COMPARATIVA -->
+        <div id="content-comparative" class="tab-content hidden space-y-6">
+            <!-- Side-by-side Species Comparison Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Arabica Card -->
+                <div class="bg-coffeeCard p-6 rounded-2xl border-2 border-coffeeCaramel/40 shadow-xs space-y-4">
+                    <div class="flex justify-between items-center border-b border-coffeeBeige/30 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-coffeeCaramel/15 flex items-center justify-center text-coffeeCaramel font-bold text-lg">
+                                A
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-coffeeTitle">Coffea Arabica</h3>
+                                <p class="text-xs text-coffeeText">Complexidade Aromática & Acidez Notável</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-coffeeCaramel bg-coffeeCaramel/10 px-3 py-1 rounded-full">97,9% da Base</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-coffeeBg p-3 rounded-xl">
+                            <span class="text-coffeeText block">Pontuação Máxima</span>
+                            <span class="text-xl font-bold text-coffeeCaramel">90,58 pts</span>
+                        </div>
+                        <div class="bg-coffeeBg p-3 rounded-xl">
+                            <span class="text-coffeeText block">Pontuação Média</span>
+                            <span class="text-xl font-bold text-coffeeTitle">82,18 pts</span>
+                        </div>
+                        <div class="bg-coffeeBg p-3 rounded-xl">
+                            <span class="text-coffeeText block">Total de Lotes</span>
+                            <span class="text-lg font-semibold text-coffeeTitle">1.310 Lotes</span>
+                        </div>
+                        <div class="bg-coffeeBg p-3 rounded-xl">
+                            <span class="text-coffeeText block">Maior Volume Produtivo</span>
+                            <span class="text-lg font-semibold text-coffeeTitle">Colômbia / Guatemala / Brasil</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Robusta Card -->
+                <div class="bg-coffeeCard p-6 rounded-2xl border-2 border-coffeeOlive/40 shadow-xs space-y-4">
+                    <div class="flex justify-between items-center border-b border-coffeeBeige/30 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-coffeeOlive/15 flex items-center justify-center text-coffeeOlive font-bold text-lg">
+                                R
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-coffeeTitle">Coffea Canephora (Robusta)</h3>
+                                <p class="text-xs text-coffeeText">Marcante Corpo & Notas Marcantes de Amargor/Doçura</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-coffeeOlive bg-coffeeOlive/15 px-3 py-1 rounded-full">2,1% da Base</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-coffeeBg p-3 rounded-xl">
+                            <span class="text-coffeeText block">Pontuação Máxima</span>
+                            <span class="text-xl font-bold text-coffeeOlive">83,75 pts</span>
+                        </div>
+                        <div class="bg-coffeeBg p-3 rounded-xl">
+                            <span class="text-coffeeText block">Pontuação Média</span>
+                            <span class="text-xl font-bold text-coffeeTitle">80,87 pts</span>
+                        </div>
+                        <div class="bg-coffeeBg p-3 rounded-xl">
+                            <span class="text-coffeeText block">Total de Lotes</span>
+                            <span class="text-lg font-semibold text-coffeeTitle">28 Lotes</span>
+                        </div>
+                        <div class="bg-coffeeBg p-3 rounded-xl">
+                            <span class="text-coffeeText block">Maior Volume Produtivo</span>
+                            <span class="text-lg font-semibold text-coffeeTitle">Índia / Uganda</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grouped Bar Chart Comparative -->
+            <div class="bg-coffeeCard p-5 sm:p-6 rounded-2xl border border-coffeeBeige/40 shadow-xs">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-coffeeTitle">Comparativo Direto de Desempenho</h3>
+                    <p class="text-xs text-coffeeText">Contraste de pontuação máxima e média geral entre as espécies</p>
+                </div>
+                <div class="relative h-72 w-full">
+                    <canvas id="chartComparativeScores"></canvas>
+                </div>
+            </div>
+
+            <!-- Methodological Insights Box -->
+            <div class="bg-coffeeBg/80 p-5 sm:p-6 rounded-2xl border border-coffeeBeige/60 space-y-3">
+                <div class="flex items-center gap-2 text-coffeeTitle font-bold text-base">
+                    <i class="fa-solid fa-lightbulb text-coffeeCaramel"></i>
+                    <span>Direcionamentos Estatísticos e Analíticos</span>
+                </div>
+                <div class="text-xs sm:text-sm text-coffeeText space-y-2 leading-relaxed">
+                    <p>
+                        <strong>1. Ressalva de Amostragem:</strong> A comparação entre as espécies deve considerar a diferença volumétrica na amostragem da base (1.310 lotes de Arábica contra apenas 28 de Robusta). As fichas de degustação técnica do CQI também aplicam critérios diferenciados.
+                    </p>
+                    <p>
+                        <strong>2. Relação Altitude x Qualidade:</strong> Na espécie Arábica, nota-se uma nítida concentração de lotes excepcionais (acima de 88 pontos) em altitudes superiores a 1.600 metros, especialmente na Etiópia e Guatemala. Os lotes brasileiros destacam-se pela consistência na faixa de 1.000m a 1.300m.
+                    </p>
+                    <p>
+                        <strong>3. Influência dos Processamentos:</strong> O método via úmida (<em>Washed/Wet</em>) atingiu a nota máxima global (90,58), enquanto o método via seca (<em>Natural/Dry</em>) garantiu excelente média e representou a quase totalidade dos destaques do café brasileiro.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-coffeeCard border-t border-coffeeBeige/30 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-coffeeText gap-2">
+            <div>
+                <span class="font-bold text-coffeeTitle">Dashboard de Análise de Cafés Especiais</span> &copy; 2026 | Inteligência de Dados
+            </div>
+            <div class="flex items-center space-x-4">
+                <span>SQL Verified</span>
+                <span>•</span>
+                <span>Padrão de Qualidade CQI / SCAA</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic & Charts Initialization -->
+    <script>
+        // Exact Data Structures from SQL queries with full Sensory Attributes
+        const dataTop10World = [
+            { rank: 1, country: 'Etiópia', process: 'Washed / Wet', altitude: '2075m', score: 90.58, sensory: { aroma: 8.67, flavor: 8.83, aftertaste: 8.67, acidity: 8.75, body: 8.50, balance: 8.42 } },
+            { rank: 2, country: 'Etiópia', process: 'Washed / Wet', altitude: '2075m', score: 89.92, sensory: { aroma: 8.75, flavor: 8.67, aftertaste: 8.50, acidity: 8.58, body: 8.42, balance: 8.42 } },
+            { rank: 3, country: 'Guatemala', process: 'Natural / Dry', altitude: '1700m', score: 89.75, sensory: { aroma: 8.42, flavor: 8.50, aftertaste: 8.42, acidity: 8.42, body: 8.33, balance: 8.42 } },
+            { rank: 4, country: 'Etiópia', process: 'Natural / Dry', altitude: '2000m', score: 89.00, sensory: { aroma: 8.17, flavor: 8.58, aftertaste: 8.42, acidity: 8.42, body: 8.50, balance: 8.25 } },
+            { rank: 5, country: 'Etiópia', process: 'Washed / Wet', altitude: '2075m', score: 88.83, sensory: { aroma: 8.25, flavor: 8.50, aftertaste: 8.25, acidity: 8.50, body: 8.42, balance: 8.33 } },
+            { rank: 6, country: 'Brasil', process: 'Natural / Dry', altitude: '1250m', score: 88.83, sensory: { aroma: 8.58, flavor: 8.42, aftertaste: 8.42, acidity: 8.50, body: 8.25, balance: 8.33 } },
+            { rank: 7, country: 'Peru', process: 'Washed / Wet', altitude: '1600m', score: 88.75, sensory: { aroma: 8.42, flavor: 8.50, aftertaste: 8.33, acidity: 8.50, body: 8.25, balance: 8.25 } },
+            { rank: 8, country: 'Etiópia', process: 'Não Informado', altitude: '1635m', score: 88.67, sensory: { aroma: 8.25, flavor: 8.33, aftertaste: 8.50, acidity: 8.42, body: 8.33, balance: 8.50 } },
+            { rank: 9, country: 'Etiópia', process: 'Não Informado', altitude: '1635m', score: 88.42, sensory: { aroma: 8.67, flavor: 8.67, aftertaste: 8.58, acidity: 8.42, body: 8.33, balance: 8.42 } },
+            { rank: 10, country: 'Etiópia', process: 'Natural / Dry', altitude: '1822.5m', score: 88.25, sensory: { aroma: 8.08, flavor: 8.58, aftertaste: 8.50, acidity: 7.67, body: 8.42, balance: 8.42 } }
+        ];
+
+        const dataTop10Brazil = [
+            { rank: 6, region: 'South Of Minas', producer: 'Desconhecido', variety: 'Yellow Bourbon', score: 88.83, sensory: { aroma: 8.58, flavor: 8.42, aftertaste: 8.42, acidity: 8.50, body: 8.25, balance: 8.33 } },
+            { rank: 26, region: 'South Of Minas', producer: 'Ralph Junqueira', variety: 'Bourbon', score: 86.92, sensory: { aroma: 8.50, flavor: 8.50, aftertaste: 8.00, acidity: 8.00, body: 8.00, balance: 8.00 } },
+            { rank: 33, region: 'Vale Da Grama', producer: 'Homero Teixeira', variety: 'Bourbon', score: 86.42, sensory: { aroma: 8.50, flavor: 8.17, aftertaste: 8.00, acidity: 7.75, body: 8.00, balance: 8.00 } },
+            { rank: 42, region: 'Sul De Minas', producer: 'Maria Rogeria', variety: 'Yellow Bourbon', score: 86.17, sensory: { aroma: 8.17, flavor: 7.92, aftertaste: 7.92, acidity: 7.75, body: 8.33, balance: 8.00 } },
+            { rank: 43, region: 'Sul De Minas', producer: 'Maria Rogeria', variety: 'Yellow Bourbon', score: 86.17, sensory: { aroma: 8.42, flavor: 7.92, aftertaste: 8.00, acidity: 7.75, body: 7.92, balance: 8.00 } },
+            { rank: 46, region: 'South Of Minas', producer: 'Ralph Junqueira', variety: 'Bourbon', score: 86.08, sensory: { aroma: 8.33, flavor: 8.00, aftertaste: 8.00, acidity: 8.00, body: 7.75, balance: 8.00 } },
+            { rank: 74, region: 'South Of Minas', producer: 'José Vagner', variety: 'Bourbon', score: 85.42, sensory: { aroma: 8.00, flavor: 8.00, aftertaste: 8.00, acidity: 7.67, body: 7.75, balance: 8.00 } },
+            { rank: 103, region: 'Grama Valley', producer: 'Idalina M. De Andrade', variety: 'Mundo Novo', score: 85.00, sensory: { aroma: 8.00, flavor: 8.00, aftertaste: 7.83, acidity: 7.83, body: 7.67, balance: 7.67 } },
+            { rank: 113, region: 'South Of Minas', producer: 'Glaucio Carneiro Pinto', variety: 'Bourbon', score: 84.92, sensory: { aroma: 8.00, flavor: 7.92, aftertaste: 7.75, acidity: 7.75, body: 8.00, balance: 7.75 } },
+            { rank: 114, region: 'South Of Minas', producer: 'Ricardo Luiz Ferreira', variety: 'Catuaí', score: 84.92, sensory: { aroma: 8.00, flavor: 8.00, aftertaste: 7.75, acidity: 8.00, body: 7.50, balance: 7.75 } }
+        ];
+
+        const dataRobustaTop = [
+            { rank: 1, country: 'Uganda', process: 'Não Informado', score: 83.75, sensory: { aroma: 7.83, flavor: 7.75, aftertaste: 7.92, saltAcid: 8.00, bitterSweet: 8.25, mouthfeel: 8.25, balance: 7.92 } },
+            { rank: 2, country: 'Índia', process: 'Washed / Wet', score: 83.50, sensory: { aroma: 8.00, flavor: 7.75, aftertaste: 7.92, saltAcid: 8.00, bitterSweet: 8.00, mouthfeel: 7.92, balance: 7.92 } },
+            { rank: 3, country: 'Índia', process: 'Não Informado', score: 83.25, sensory: { aroma: 7.92, flavor: 7.83, aftertaste: 7.92, saltAcid: 8.00, bitterSweet: 7.83, mouthfeel: 7.83, balance: 7.92 } },
+            { rank: 4, country: 'Uganda', process: 'Não Informado', score: 83.00, sensory: { aroma: 8.00, flavor: 7.92, aftertaste: 7.92, saltAcid: 7.75, bitterSweet: 7.75, mouthfeel: 7.83, balance: 7.75 } },
+            { rank: 5, country: 'Uganda', process: 'Não Informado', score: 83.00, sensory: { aroma: 8.33, flavor: 7.83, aftertaste: 7.83, saltAcid: 7.75, bitterSweet: 7.58, mouthfeel: 8.25, balance: 7.75 } }
+        ];
+
+        // Theme Palette Colors for Multiple Selection Overlays
+        const colorPalette = [
+            { border: '#B98755', bg: 'rgba(185, 135, 85, 0.25)' },
+            { border: '#49352A', bg: 'rgba(73, 53, 42, 0.20)' },
+            { border: '#788064', bg: 'rgba(120, 128, 100, 0.25)' },
+            { border: '#C86D51', bg: 'rgba(200, 109, 81, 0.20)' },
+            { border: '#5B7065', bg: 'rgba(91, 112, 101, 0.20)' }
+        ];
+
+        // Global Charts Registry
+        let charts = {};
+
+        // Document Ready Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTables();
+            buildSensorySelectors();
+            initCharts();
+        });
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Hide all tab content sections
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+
+            // Remove active class from all tab buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-coffeeText');
+                btn.classList.remove('bg-coffeeTitle', 'text-coffeeCard');
+            });
+
+            // Show selected tab content
+            const activeContent = document.getElementById(`content-${tabId}`);
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
+            }
+
+            // Highlight selected tab button
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.classList.remove('text-coffeeText');
+            }
+
+            // Force Chart.js to resize and render properly in newly unhidden containers
+            setTimeout(() => {
+                Object.values(charts).forEach(chart => {
+                    if (chart && typeof chart.resize === 'function') {
+                        chart.resize();
+                        chart.update('none');
+                    }
+                });
+            }, 60);
+        }
+
+        // Dynamic Sensory Selectors Builder
+        function buildSensorySelectors() {
+            // World Top 10 Checkboxes
+            const worldContainer = document.getElementById('selector-sensory-world');
+            if (worldContainer) {
+                worldContainer.innerHTML = dataTop10World.map((item, idx) => `
+                    <label class="inline-flex items-center gap-1.5 bg-coffeeCard border border-coffeeBeige/60 px-2.5 py-1 rounded-lg text-xs font-semibold text-coffeeTitle cursor-pointer hover:border-coffeeCaramel transition-colors">
+                        <input type="checkbox" value="${idx}" ${idx < 2 ? 'checked' : ''} onchange="updateWorldRadarChart()" class="accent-coffeeCaramel">
+                        <span>#${item.rank} ${item.country} (${item.score})</span>
+                    </label>
+                `).join('');
+            }
+
+            // Brazil Top 10 Checkboxes
+            const brazilContainer = document.getElementById('selector-sensory-brazil');
+            if (brazilContainer) {
+                brazilContainer.innerHTML = dataTop10Brazil.map((item, idx) => `
+                    <label class="inline-flex items-center gap-1.5 bg-coffeeCard border border-coffeeBeige/60 px-2.5 py-1 rounded-lg text-xs font-semibold text-coffeeTitle cursor-pointer hover:border-coffeeOlive transition-colors">
+                        <input type="checkbox" value="${idx}" ${idx < 2 ? 'checked' : ''} onchange="updateBrazilRadarChart()" class="accent-coffeeOlive">
+                        <span>Rank ${item.rank} ${item.region} (${item.score})</span>
+                    </label>
+                `).join('');
+            }
+
+            // Robusta Checkboxes
+            const robustaContainer = document.getElementById('selector-sensory-robusta');
+            if (robustaContainer) {
+                robustaContainer.innerHTML = dataRobustaTop.map((item, idx) => `
+                    <label class="inline-flex items-center gap-1.5 bg-coffeeCard border border-coffeeBeige/60 px-2.5 py-1 rounded-lg text-xs font-semibold text-coffeeTitle cursor-pointer hover:border-coffeeOlive transition-colors">
+                        <input type="checkbox" value="${idx}" ${idx < 2 ? 'checked' : ''} onchange="updateRobustaRadarChart()" class="accent-coffeeOlive">
+                        <span>Lote ${item.rank} ${item.country} (${item.score})</span>
+                    </label>
+                `).join('');
+            }
+        }
+
+        // Render Data Tables
+        function renderTables() {
+            const worldTable = document.getElementById('table-top10-world');
+            if (worldTable) {
+                worldTable.innerHTML = dataTop10World.map(item => `
+                    <tr class="hover:bg-coffeeBg/50 transition-colors">
+                        <td class="py-2.5 px-2 font-bold text-coffeeTitle">${item.rank}</td>
+                        <td class="py-2.5 px-2 font-semibold text-coffeeTitle">${item.country}</td>
+                        <td class="py-2.5 px-2 text-coffeeText">${item.process}</td>
+                        <td class="py-2.5 px-2 text-coffeeText">${item.altitude}</td>
+                        <td class="py-2.5 px-2 text-right font-bold text-coffeeCaramel">${item.score.toFixed(2)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            const brazilTable = document.getElementById('table-top10-brazil');
+            if (brazilTable) {
+                brazilTable.innerHTML = dataTop10Brazil.map(item => `
+                    <tr class="hover:bg-coffeeBg/50 transition-colors">
+                        <td class="py-2.5 px-2 font-bold text-coffeeTitle">${item.rank}</td>
+                        <td class="py-2.5 px-2 font-semibold text-coffeeTitle">${item.region}</td>
+                        <td class="py-2.5 px-2 text-coffeeText truncate max-w-[120px]">${item.producer}</td>
+                        <td class="py-2.5 px-2 text-coffeeText">${item.variety}</td>
+                        <td class="py-2.5 px-2 text-right font-bold text-coffeeOlive">${item.score.toFixed(2)}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Initialize All Charts
+        function initCharts() {
+            // Chart 1: Radar Sensory Top 10 World
+            const ctxWorld = document.getElementById('chartSensoryWorld');
+            if (ctxWorld) {
+                charts.sensoryWorld = new Chart(ctxWorld.getContext('2d'), {
+                    type: 'radar',
+                    data: { labels: ['Aroma', 'Sabor', 'Aftertaste', 'Acidez', 'Corpo', 'Balanço'], datasets: [] },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { r: { min: 7.5, max: 9.0, ticks: { stepSize: 0.3 } } },
+                        plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } }
+                    }
+                });
+                updateWorldRadarChart();
+            }
+
+            // Chart 2: Radar Sensory Top 10 Brazil
+            const ctxBrazil = document.getElementById('chartSensoryBrazil');
+            if (ctxBrazil) {
+                charts.sensoryBrazil = new Chart(ctxBrazil.getContext('2d'), {
+                    type: 'radar',
+                    data: { labels: ['Aroma', 'Sabor', 'Aftertaste', 'Acidez', 'Corpo', 'Balanço'], datasets: [] },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { r: { min: 7.0, max: 8.8, ticks: { stepSize: 0.3 } } },
+                        plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } }
+                    }
+                });
+                updateBrazilRadarChart();
+            }
+
+            // Chart 3: Altitude vs Score Scatter Plot
+            const ctxAltitude = document.getElementById('chartAltitudeScatter');
+            if (ctxAltitude) {
+                charts.altitude = new Chart(ctxAltitude.getContext('2d'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Lotes Arábica Auditados',
+                            data: [
+                                { x: 2075, y: 90.58 }, { x: 2075, y: 89.92 }, { x: 1700, y: 89.75 }, { x: 2000, y: 89.00 },
+                                { x: 2075, y: 88.83 }, { x: 1250, y: 88.83 }, { x: 1600, y: 88.75 }, { x: 1635, y: 88.67 },
+                                { x: 1635, y: 88.42 }, { x: 1822.5, y: 88.25 }, { x: 1905, y: 88.08 }, { x: 1872, y: 87.92 },
+                                { x: 1943, y: 87.92 }, { x: 609.6, y: 87.92 }, { x: 2080, y: 87.58 }, { x: 2019, y: 87.25 },
+                                { x: 2112, y: 87.08 }, { x: 1941, y: 86.17 }, { x: 1950, y: 86.83 }, { x: 1860, y: 86.00 },
+                                { x: 1770, y: 85.33 }, { x: 1300, y: 86.42 }, { x: 1100, y: 85.00 }, { x: 1000, y: 84.92 }
+                            ],
+                            backgroundColor: '#B98755',
+                            borderColor: '#49352A',
+                            borderWidth: 1,
+                            pointRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { title: { display: true, text: 'Altitude Média (Metros)' }, min: 500, max: 2300 },
+                            y: { title: { display: true, text: 'Pontuação Total' }, min: 83, max: 91 }
+                        }
+                    }
+                });
+            }
+
+            // Chart 4: Processing Method Impact
+            const ctxProcessing = document.getElementById('chartProcessingImpact');
+            if (ctxProcessing) {
+                charts.processing = new Chart(ctxProcessing.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Washed / Wet', 'Natural / Dry', 'Pulped Natural', 'Semi-Washed', 'Outros'],
+                        datasets: [
+                            { label: 'Nota Máxima', data: [90.58, 89.00, 86.58, 86.08, 84.67], backgroundColor: '#49352A' },
+                            { label: 'Nota Média', data: [81.96, 82.35, 82.80, 82.63, 81.27], backgroundColor: '#D8C3A5' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { min: 78, max: 92 } }
+                    }
+                });
+            }
+
+            // Chart 5: Country Average Score
+            const ctxCountryAvg = document.getElementById('chartCountryAverage');
+            if (ctxCountryAvg) {
+                charts.countryAvg = new Chart(ctxCountryAvg.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Etiópia', 'Quênia', 'Uganda', 'Colômbia', 'El Salvador', 'Costa Rica', 'Tailândia', 'Indonésia', 'Brasil', 'Guatemala'],
+                        datasets: [{
+                            label: 'Média de Pontuação (Lotes ≥ 20)',
+                            data: [85.48, 84.31, 84.05, 83.08, 83.05, 82.79, 82.57, 82.57, 82.41, 81.85],
+                            backgroundColor: '#B98755',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: { x: { min: 80, max: 87 } }
+                    }
+                });
+            }
+
+            // Chart 6: Top Producers (Total Bags)
+            const ctxProducers = document.getElementById('chartTopProducers');
+            if (ctxProducers) {
+                charts.producers = new Chart(ctxProducers.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Colômbia', 'Guatemala', 'Brasil', 'México', 'Honduras', 'Etiópia', 'Costa Rica', 'Nicarágua', 'El Salvador', 'Quênia'],
+                        datasets: [{
+                            label: 'Total de Sacas (60kg)',
+                            data: [41353, 36868, 30534, 24140, 12892, 11761, 10354, 6406, 4449, 3971],
+                            backgroundColor: '#788064',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // Chart 7: Robusta Radar Chart
+            const ctxRobustaRadar = document.getElementById('chartRobustaRadar');
+            if (ctxRobustaRadar) {
+                charts.robustaRadar = new Chart(ctxRobustaRadar.getContext('2d'), {
+                    type: 'radar',
+                    data: { labels: ['Aroma', 'Sabor', 'Aftertaste', 'Sal / Acidez', 'Amargor / Doçura', 'Corpo', 'Balanço'], datasets: [] },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { r: { min: 7.0, max: 8.5, ticks: { stepSize: 0.3 } } },
+                        plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } }
+                    }
+                });
+                updateRobustaRadarChart();
+            }
+
+            // Chart 8: Robusta Country Performance
+            const ctxRobustaCountries = document.getElementById('chartRobustaCountries');
+            if (ctxRobustaCountries) {
+                charts.robustaCountries = new Chart(ctxRobustaCountries.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Uganda', 'Índia', 'Equador', 'Estados Unidos', 'Vietnã'],
+                        datasets: [
+                            { label: 'Pontuação Média', data: [81.89, 81.41, 78.42, 78.25, 73.75], backgroundColor: '#788064', yAxisID: 'y' },
+                            { label: 'Total de Sacas', data: [1609, 2991, 2, 101, 1], backgroundColor: '#D8C3A5', yAxisID: 'y1' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { type: 'linear', display: true, position: 'left', min: 70, max: 85, title: { display: true, text: 'Pontuação Média' } },
+                            y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Volume de Sacas' } }
+                        }
+                    }
+                });
+            }
+
+            // Chart 9: Species Comparative Score Bar Chart
+            const ctxComparative = document.getElementById('chartComparativeScores');
+            if (ctxComparative) {
+                charts.comparative = new Chart(ctxComparative.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Pontuação Máxima Absolute', 'Pontuação Média Geral'],
+                        datasets: [
+                            { label: 'Arábica (1.310 Lotes)', data: [90.58, 82.18], backgroundColor: '#B98755', borderRadius: 6 },
+                            { label: 'Robusta (28 Lotes)', data: [83.75, 80.87], backgroundColor: '#788064', borderRadius: 6 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { min: 70, max: 95 } }
+                    }
+                });
+            }
+        }
+
+        // Radar Update Function: World Top 10
+        function updateWorldRadarChart() {
+            if (!charts.sensoryWorld) return;
+            const selectedIdxs = Array.from(document.querySelectorAll('#selector-sensory-world input:checked')).map(cb => parseInt(cb.value));
+            
+            const datasets = selectedIdxs.map((idx, colorIdx) => {
+                const item = dataTop10World[idx];
+                const color = colorPalette[colorIdx % colorPalette.length];
+                return {
+                    label: `#${item.rank} ${item.country} (${item.score})`,
+                    data: [item.sensory.aroma, item.sensory.flavor, item.sensory.aftertaste, item.sensory.acidity, item.sensory.body, item.sensory.balance],
+                    borderColor: color.border,
+                    backgroundColor: color.bg,
+                    borderWidth: 2
+                };
+            });
+
+            charts.sensoryWorld.data.datasets = datasets;
+            charts.sensoryWorld.update();
+        }
+
+        // Radar Update Function: Brazil Top 10
+        function updateBrazilRadarChart() {
+            if (!charts.sensoryBrazil) return;
+            const selectedIdxs = Array.from(document.querySelectorAll('#selector-sensory-brazil input:checked')).map(cb => parseInt(cb.value));
+
+            const datasets = selectedIdxs.map((idx, colorIdx) => {
+                const item = dataTop10Brazil[idx];
+                const color = colorPalette[colorIdx % colorPalette.length];
+                return {
+                    label: `Rank ${item.rank} ${item.region} (${item.score})`,
+                    data: [item.sensory.aroma, item.sensory.flavor, item.sensory.aftertaste, item.sensory.acidity, item.sensory.body, item.sensory.balance],
+                    borderColor: color.border,
+                    backgroundColor: color.bg,
+                    borderWidth: 2
+                };
+            });
+
+            charts.sensoryBrazil.data.datasets = datasets;
+            charts.sensoryBrazil.update();
+        }
+
+        // Radar Update Function: Robusta
+        function updateRobustaRadarChart() {
+            if (!charts.robustaRadar) return;
+            const selectedIdxs = Array.from(document.querySelectorAll('#selector-sensory-robusta input:checked')).map(cb => parseInt(cb.value));
+
+            const datasets = selectedIdxs.map((idx, colorIdx) => {
+                const item = dataRobustaTop[idx];
+                const color = colorPalette[colorIdx % colorPalette.length];
+                return {
+                    label: `Lote ${item.rank} ${item.country} (${item.score})`,
+                    data: [item.sensory.aroma, item.sensory.flavor, item.sensory.aftertaste, item.sensory.saltAcid, item.sensory.bitterSweet, item.sensory.mouthfeel, item.sensory.balance],
+                    borderColor: color.border,
+                    backgroundColor: color.bg,
+                    borderWidth: 2
+                };
+            });
+
+            charts.robustaRadar.data.datasets = datasets;
+            charts.robustaRadar.update();
+        }
+
+        // Global Filters Logic
+        function applyFilters() {
+            const countryFilter = document.getElementById('filter-country').value;
+            const processFilter = document.getElementById('filter-process').value;
+            const scoreFilter = document.getElementById('filter-score').value;
+
+            let count = 1338;
+            if (countryFilter !== 'all') count = Math.floor(count * 0.4);
+            if (processFilter !== 'all') count = Math.floor(count * 0.6);
+            if (scoreFilter !== 'all') count = Math.floor(count * 0.3);
+
+            document.getElementById('active-records').innerText = count.toLocaleString('pt-BR');
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-country').value = 'all';
+            document.getElementById('filter-process').value = 'all';
+            document.getElementById('filter-score').value = 'all';
+            document.getElementById('active-records').innerText = '1.338';
+        }
+    </script>
+</body>
+</html>
