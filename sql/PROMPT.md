@@ -1,4 +1,4 @@
-# Engenharia de Prompt — Dashboard de Cafés Especiais
+# Dashboard de Cafés Especiais
 
 Este documento regista os prompts e o processo interativo utilizado no **Gemini** para prototipar e gerar o dashboard interativo ([`specialty-coffee-dashboard.html`](./specialty-coffee-dashboard.html)).
 

@@ -37,6 +37,6 @@ specialty-coffee-etl/
 ├── requirements.txt            # Bibliotecas necessárias
 ├── README.md                   # Documentação do projeto
 └── sql/
-    ├── PROMPT.md                       # Registro de engenharia de prompt (Dashboard Gemini)
+    ├── PROMPT.md                       # Registro de prompt (Dashboard Gemini)
     ├── query.sql                       # Queries SQL para análises e agregações
     └── specialty-coffee-dashboard.html # Dashboard interativo de visualização
